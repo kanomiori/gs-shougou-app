@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>称号を贈る</title>
+<title>はなむけの二つ名</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@500;700;900&display=swap" rel="stylesheet">
@@ -69,6 +69,28 @@ input[type=text],input[type=password]{width:100%;border:1px solid var(--line);bo
 .spk .t{margin-left:auto;color:var(--sub);font-size:13px}
 .two{display:grid;gap:16px}
 @media(min-width:760px){.two{grid-template-columns:1fr 1fr}}
+
+/* ---- 参加者画面（G'sカラー・白基調。ダークモードでも白のまま） ---- */
+body.aud{
+  --bg:#fff; --surface:#fff; --ink:#1a1a1a; --sub:#6e7781; --line:#e2e7ec;
+  --accent:#00A5FF; --accent-ink:#fff; --red:#E21010; --ng:#E21010;
+  background:#fff; color:var(--ink); color-scheme:light;
+}
+body.aud .bar{border-bottom:3px solid var(--accent)}
+body.aud .pill.on{background:#e3f4ff;color:#0077b8} body.aud .pill.off{background:#fde7e7;color:var(--red)}
+body.aud .bar b::before{content:"";display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--red);margin-right:8px;vertical-align:2px}
+body.aud .live{display:inline-flex;align-items:center;gap:6px;color:var(--red);font-size:12px;font-weight:700;letter-spacing:.08em}
+body.aud .live::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--red);animation:blink 1.4s ease-in-out infinite}
+@keyframes blink{50%{opacity:.25}}
+body.aud .word{border-width:1.5px;font-weight:700}
+body.aud .word:hover{border-color:var(--accent);color:var(--accent)}
+body.aud .word.sel,body.aud .word.sel:hover{background:var(--accent);border-color:var(--accent);color:#fff}
+body.aud .primary{font-size:16px;letter-spacing:.04em;box-shadow:0 4px 0 #0084cc}
+body.aud .primary:active{transform:translateY(2px);box-shadow:0 2px 0 #0084cc}
+body.aud .gift{color:var(--accent)}
+body.aud .card.result{border:0;background:#f2f9ff;border-radius:14px}
+body.aud .card.result .gift{font-size:28px;font-weight:900;margin-top:6px}
+@media (prefers-reduced-motion:reduce){body.aud .live::before{animation:none}}
 
 /* ---- 表示画面 ---- */
 .stage{position:fixed;inset:0;background:#0b0b0b;color:#fff;display:flex;align-items:center;justify-content:center;overflow:hidden;text-align:center;padding:24px}
@@ -141,7 +163,8 @@ input[type=text],input[type=password]{width:100%;border:1px solid var(--line);bo
 
   // =================== 参加者 ===================
   function audience() {
-    document.title = "称号を贈る";
+    document.title = "はなむけの二つ名";
+    document.body.classList.add("aud");
     let voter = store.get("shougou-voter");
     if (!voter) { voter = crypto.randomUUID().slice(0, 12); store.set("shougou-voter", voter); }
     const mine = {}; // speakerId -> {h,b}
@@ -172,17 +195,17 @@ input[type=text],input[type=password]{width:100%;border:1px solid var(--line);bo
         body = axis("どうつくった人に見えた？", state.how, "h") + axis("どういう存在に見えた？", state.being, "b") +
           (error ? `<p class="err">${esc(error)}</p>` : "") +
           `<button class="primary" id="send" ${busy ? "disabled" : ""}>${busy ? "送信中…" : sent ? "選び直して贈る" : "この2つを贈る"}</button>` +
-          (sent ? `<p class="muted" style="text-align:center;margin-top:12px">贈りました：<b>${esc(state.how[sent.h])}${esc(state.being[sent.b])}</b><br>締め切りまで選び直せます</p>` : "");
+          (sent ? `<p class="muted" style="text-align:center;margin-top:14px">贈りました：<b class="gift">${esc(state.how[sent.h])}${esc(state.being[sent.b])}</b><br>締め切りまで選び直せます</p>` : "");
       } else if (state.phase === "closed") {
-        body = `<div class="card sec muted">締め切りました。集計しています…</div>`;
+        body = `<div class="card result sec muted">締め切りました。集計しています…</div>`;
       } else if (title) {
-        body = `<div class="card sec"><div class="label">贈られた称号</div><div style="font-size:28px;font-weight:900;margin-top:6px">${esc(state.how[title.h])}${esc(state.being[title.b])}</div></div>`;
+        body = `<div class="card result sec"><div class="label">贈られた二つ名</div><div class="gift">${esc(state.how[title.h])}${esc(state.being[title.b])}</div></div>`;
       }
       $app.innerHTML = `
-        <div class="bar"><b>称号を贈る</b><span class="pill ${online ? "on" : "off"}">${online ? "接続中" : "再接続中"}</span>
+        <div class="bar"><b>はなむけの二つ名</b><span class="pill ${online ? "on" : "off"}">${online ? "接続中" : "再接続中"}</span>
           <span class="muted" style="margin-left:auto">${state.index + 1} / ${state.speakers.length}</span></div>
         <div class="wrap">
-          <div class="label">いま発表中</div>
+          <div class="live">いま発表中</div>
           <h1>${esc(c.name)}</h1>
           <div class="muted">${esc(c.campus)}　${esc(c.product)}</div>
           ${body}
@@ -390,7 +413,7 @@ input[type=text],input[type=password]{width:100%;border:1px solid var(--line);bo
 
   // =================== 表示 ===================
   function stage() {
-    document.title = "称号｜表示";
+    document.title = "はなむけの二つ名｜表示";
     let shownSeq = null, step = 0, timers = [];
     const avatar = (c, dim) => c.photo
       ? `<img class="avatar ${dim ? "dim" : ""}" src="${esc(c.photo)}" alt="">`
@@ -406,7 +429,7 @@ input[type=text],input[type=password]{width:100%;border:1px solid var(--line);bo
         $app.innerHTML = `<div class="stage"><div class="glow"></div><div>
           <div class="tiny">NOW PRESENTING</div>${avatar(c, true)}
           <div class="who">${esc(c.name)}</div><div class="meta">${esc(c.campus)}</div><div class="meta">${esc(c.product)}</div>
-          <div class="tiny" style="margin-top:56px">${state.phase === "voting" ? "称号を受付中" : "集計中"}</div></div>${count}</div>`;
+          <div class="tiny" style="margin-top:56px">${state.phase === "voting" ? "二つ名を受付中" : "集計中"}</div></div>${count}</div>`;
         return;
       }
       const s = (n, cls) => (step >= n ? cls : "hide");
