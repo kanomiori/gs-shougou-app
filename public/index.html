@@ -65,6 +65,13 @@ textarea{width:100%;min-height:260px;border:1px solid var(--line);border-radius:
 input[type=text],input[type=password]{width:100%;border:1px solid var(--line);border-radius:8px;padding:10px;font-size:14px}
 .spk{display:flex;align-items:center;gap:10px;padding:8px;border-radius:8px;font-size:14px}
 .spk.cur{background:var(--bg);font-weight:700}
+.spk .grip{cursor:grab;color:var(--sub);font-size:16px;user-select:none;padding:0 2px}
+.spk .mv{display:inline-flex;flex-direction:column;gap:1px}
+.spk .mv button{border:1px solid var(--line);background:var(--surface);border-radius:4px;font-size:9px;line-height:1;padding:2px 5px;color:var(--sub)}
+.spk .mv button:disabled{opacity:.3;cursor:default}
+.spk.dragging{opacity:.4}
+.spk.over-top{box-shadow:inset 0 3px 0 #00A5FF}
+.spk.over-bottom{box-shadow:inset 0 -3px 0 #00A5FF}
 .spk .no{width:2em;color:var(--sub);font-variant-numeric:tabular-nums}
 .spk .t{margin-left:auto;color:var(--sub);font-size:13px}
 .two{display:grid;gap:16px}
@@ -347,8 +354,10 @@ body.aud .card.result .gift{font-size:28px;font-weight:900;margin-top:6px}
         body = `
           <div class="two">
             <div>
-              <div class="label">発表順（クリックでその人に移動）</div>
-              <div style="margin-top:8px">${state.speakers.map((s, i) => `<div class="spk ${i === state.index ? "cur" : ""}">
+              <div class="label">発表順（名前クリックでその人に移動／⠿ をドラッグか ▲▼ で並べ替え）</div>
+              <div style="margin-top:8px" id="order">${state.speakers.map((s, i) => `<div class="spk ${i === state.index ? "cur" : ""}" draggable="true" data-id="${esc(s.id)}" data-i="${i}">
+                <span class="grip" title="ドラッグで移動">⠿</span>
+                <span class="mv"><button data-move="${esc(s.id)}" data-to="${i - 1}" ${busy || i === 0 ? "disabled" : ""} aria-label="上へ">▲</button><button data-move="${esc(s.id)}" data-to="${i + 1}" ${busy || i === state.speakers.length - 1 ? "disabled" : ""} aria-label="下へ">▼</button></span>
                 <span class="no">${i + 1}</span><button class="btn" data-goto="${i}" style="padding:4px 10px">${esc(s.name)}</button>
                 <span class="muted">${esc(s.campus)}</span>${s.photo ? `<span class="muted">📷</span>` : ""}
                 <span class="t">${state.titles[s.id] ? esc(state.how[state.titles[s.id].h] + state.being[state.titles[s.id].b]) : ""}</span></div>`).join("")}</div>
@@ -388,6 +397,31 @@ body.aud .card.result .gift{font-size:28px;font-weight:900;margin-top:6px}
       });
       $app.querySelectorAll(".bars button").forEach((el) => el.onclick = () => { pick[el.dataset.k] = Number(el.dataset.i); render(); });
       $app.querySelectorAll("[data-goto]").forEach((el) => el.onclick = () => api("goto", { index: Number(el.dataset.goto) }));
+      $app.querySelectorAll("[data-move]").forEach((el) => el.onclick = () => api("move", { id: el.dataset.move, to: Number(el.dataset.to) }));
+      // ドラッグで並べ替え
+      let dragId = null;
+      $app.querySelectorAll("#order .spk").forEach((row) => {
+        const clear = () => row.classList.remove("over-top", "over-bottom");
+        row.addEventListener("dragstart", (e) => { dragId = row.dataset.id; row.classList.add("dragging"); e.dataTransfer.effectAllowed = "move"; try { e.dataTransfer.setData("text/plain", dragId); } catch {} });
+        row.addEventListener("dragend", () => { row.classList.remove("dragging"); dragId = null; });
+        row.addEventListener("dragover", (e) => {
+          if (!dragId || dragId === row.dataset.id) return;
+          e.preventDefault();
+          const r = row.getBoundingClientRect(), top = e.clientY < r.top + r.height / 2;
+          row.classList.toggle("over-top", top); row.classList.toggle("over-bottom", !top);
+        });
+        row.addEventListener("dragleave", clear);
+        row.addEventListener("drop", (e) => {
+          e.preventDefault(); clear();
+          if (!dragId || dragId === row.dataset.id) return;
+          const from = state.speakers.findIndex((x) => x.id === dragId);
+          const target = Number(row.dataset.i);
+          const r = row.getBoundingClientRect(), after = e.clientY >= r.top + r.height / 2;
+          let to = target + (after ? 1 : 0);
+          if (from < to) to -= 1; // 自分が抜けた分ずれる
+          api("move", { id: dragId, to });
+        });
+      });
       const sp = document.getElementById("savePhoto");
       if (sp) sp.onclick = () => api("setPhoto", { id: c.id, photo: document.getElementById("photo").value });
       const sl = document.getElementById("saveList");
