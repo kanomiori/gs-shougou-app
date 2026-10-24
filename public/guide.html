@@ -1,0 +1,942 @@
+<!doctype html>
+<html lang="ja">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>今日の楽しみ方</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@500;700;900&family=Inter:wght@700;900&display=swap"
+    rel="stylesheet">
+  <style>
+    :root {
+      --blue: #00A5FF;
+      --blue-d: #0084cc;
+      --blue-l: #e6f6ff;
+      --red: #E21010;
+      --ink: #141414;
+      --sub: #6b7480;
+      --line: #e3e8ee;
+      --bg: #fff;
+      color-scheme: light;
+      font-family: "Zen Kaku Gothic New", system-ui, "Hiragino Sans", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box
+    }
+
+    html,
+    body {
+      margin: 0;
+      height: 100%;
+      background: #eef1f4;
+      color: var(--ink);
+      overflow: hidden
+    }
+
+    .en {
+      font-family: Inter, "Zen Kaku Gothic New", sans-serif;
+      letter-spacing: .02em
+    }
+
+    /* 16:9 のステージを画面いっぱいに */
+    .viewport {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center
+    }
+
+    .stage {
+      position: relative;
+      width: min(100vw, 177.78vh);
+      aspect-ratio: 16/9;
+      background: var(--bg);
+      overflow: hidden;
+      container-type: inline-size;
+      box-shadow: 0 2px 30px rgba(0, 0, 0, .08)
+    }
+
+    .slide {
+      position: absolute;
+      inset: 0;
+      padding: 5.5cqw 6.5cqw;
+      display: none;
+      flex-direction: column
+    }
+
+    .slide.on {
+      display: flex;
+      animation: in .45s cubic-bezier(.16, 1, .3, 1) both
+    }
+
+    @keyframes in {
+      from {
+        opacity: 0;
+        transform: translateY(1.2cqw)
+      }
+
+      to {
+        opacity: 1;
+        transform: none
+      }
+    }
+
+    /* 共通パーツ */
+    .band {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: .7cqw;
+      background: var(--blue)
+    }
+
+    .band::after {
+      content: "";
+      position: absolute;
+      right: 0;
+      top: 0;
+      bottom: 0;
+      width: 18%;
+      background: var(--red)
+    }
+
+    .kicker {
+      display: flex;
+      align-items: center;
+      gap: .8cqw;
+      color: var(--blue);
+      font-weight: 900;
+      font-size: 1.25cqw;
+      letter-spacing: .25em
+    }
+
+    .kicker::before {
+      content: "";
+      width: .8cqw;
+      height: .8cqw;
+      border-radius: 50%;
+      background: var(--red)
+    }
+
+    h2 {
+      font-size: 3.6cqw;
+      font-weight: 900;
+      margin: 1cqw 0 0;
+      line-height: 1.25
+    }
+
+    .lead {
+      font-size: 1.6cqw;
+      color: var(--sub);
+      margin-top: 1cqw;
+      line-height: 1.7
+    }
+
+    .foot {
+      position: absolute;
+      left: 6.5cqw;
+      bottom: 2.2cqw;
+      font-size: 1cqw;
+      color: var(--sub);
+      letter-spacing: .12em
+    }
+
+    .pg {
+      position: absolute;
+      right: 6.5cqw;
+      bottom: 2.2cqw;
+      font-size: 1cqw;
+      color: var(--sub)
+    }
+
+    .hl {
+      color: var(--blue)
+    }
+
+    .red {
+      color: var(--red)
+    }
+
+    /* 表紙 */
+    .cover {
+      justify-content: center
+    }
+
+    .cover .date {
+      font-size: 1.6cqw;
+      font-weight: 700;
+      color: var(--sub);
+      letter-spacing: .15em
+    }
+
+    .cover h1 {
+      font-size: 6.4cqw;
+      font-weight: 900;
+      line-height: 1.15;
+      margin: 1.6cqw 0 0
+    }
+
+    .cover h1 .s {
+      display: block;
+      font-size: 2.4cqw;
+      color: var(--blue);
+      margin-bottom: 1cqw;
+      letter-spacing: .06em
+    }
+
+    .cover .tag {
+      margin-top: 3cqw;
+      display: inline-flex;
+      align-items: center;
+      gap: 1cqw;
+      font-size: 1.7cqw;
+      font-weight: 700
+    }
+
+    .cover .tag b {
+      background: var(--blue);
+      color: #fff;
+      padding: .5cqw 1.2cqw;
+      border-radius: 99px
+    }
+
+    /* タイムライン */
+    .tl {
+      display: flex;
+      margin-top: 5cqw;
+      align-items: stretch;
+      gap: .8cqw;
+      height: 17cqw
+    }
+
+    .tl .blk {
+      flex: 1.25;
+      border-radius: 1cqw;
+      padding: 1.8cqw 1.1cqw;
+      background: var(--blue-l);
+      display: flex;
+      flex-direction: column;
+      gap: .7cqw;
+      word-break: keep-all;
+      min-width: 0
+    }
+
+    .tl .blk.pres {
+      background: var(--blue);
+      color: #fff;
+      flex: 1.7
+    }
+
+    .tl .blk.brk {
+      background: #fff;
+      border: .25cqw dashed #c9d3dd;
+      flex: .85
+    }
+
+    .tl .t {
+      font-size: 1.2cqw;
+      font-weight: 700;
+      opacity: .8
+    }
+
+    .tl .n {
+      font-size: 1.55cqw;
+      font-weight: 900;
+      line-height: 1.3
+    }
+
+    .tl .d {
+      font-size: 1.2cqw;
+      opacity: .9;
+      line-height: 1.5;
+      margin-top: auto;
+      word-break: normal
+    }
+
+    .note {
+      margin-top: 3.4cqw;
+      display: flex;
+      gap: 3cqw;
+      font-size: 1.5cqw
+    }
+
+    .note div {
+      display: flex;
+      align-items: center;
+      gap: .8cqw
+    }
+
+    .note i {
+      font-style: normal;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 2.2cqw;
+      height: 2.2cqw;
+      border-radius: 50%;
+      background: var(--red);
+      color: #fff;
+      font-size: 1.1cqw;
+      font-weight: 900
+    }
+
+    .tl2 {
+      margin-top: 1.8cqw;
+      display: flex;
+      flex-direction: column;
+      gap: .45cqw;
+      max-width: 70cqw
+    }
+
+    .tl2 .r {
+      display: grid;
+      grid-template-columns: 8cqw 1fr auto;
+      align-items: center;
+      gap: 1.6cqw;
+      padding: .68cqw 1.8cqw;
+      border-radius: .9cqw;
+      background: #f5f8fa;
+      font-size: 1.7cqw;
+      font-weight: 700
+    }
+
+    .tl2 .tm {
+      color: var(--sub);
+      font-size: 1.6cqw
+    }
+
+    .tl2 .r.pres {
+      background: var(--blue);
+      color: #fff
+    }
+
+    .tl2 .r.pres .tm {
+      color: #fff;
+      opacity: .85
+    }
+
+    .tl2 .r.pres b {
+      display: inline-block;
+      margin-left: 1cqw;
+      background: #fff;
+      color: var(--blue);
+      border-radius: 99px;
+      padding: .15cqw 1cqw;
+      font-size: 1.3cqw;
+      vertical-align: .15cqw
+    }
+
+    .tl2 .r.brk {
+      background: #fff;
+      border: .2cqw dashed #c9d3dd;
+      color: var(--sub)
+    }
+
+    .tl2 .dt {
+      font-size: 1.4cqw;
+      font-weight: 500;
+      opacity: .9
+    }
+
+    /* 楽しみ方 */
+    .ways {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 2.6cqw;
+      margin-top: 3cqw
+    }
+
+    .way {
+      border-radius: 1.4cqw;
+      padding: 2.6cqw 2.8cqw;
+      background: #fff;
+      border: .18cqw solid var(--line);
+      position: relative
+    }
+
+    .way.main {
+      border-color: var(--blue);
+      box-shadow: 0 1cqw 0 var(--blue-l)
+    }
+
+    .way .no {
+      font-size: 4.2cqw;
+      font-weight: 900;
+      color: var(--blue);
+      line-height: 1
+    }
+
+    .way.main .no {
+      color: var(--red)
+    }
+
+    .way h3 {
+      font-size: 2.5cqw;
+      font-weight: 900;
+      margin: 1.4cqw 0 0;
+      line-height: 1.35
+    }
+
+    .way p {
+      font-size: 1.55cqw;
+      color: var(--sub);
+      line-height: 1.75;
+      margin: 1.2cqw 0 0
+    }
+
+    .talk {
+      list-style: none;
+      padding: 0;
+      margin: 1.4cqw 0 0;
+      display: flex;
+      flex-direction: column;
+      gap: .8cqw
+    }
+
+    .talk li {
+      display: flex;
+      align-items: center;
+      gap: 1cqw;
+      font-size: 1.7cqw;
+      font-weight: 700
+    }
+
+    .talk li::before {
+      content: "";
+      flex-shrink: 0;
+      width: .8cqw;
+      height: .8cqw;
+      border-radius: 50%;
+      background: var(--blue)
+    }
+
+    /* 贈り方＋QR */
+    .split {
+      display: grid;
+      grid-template-columns: 1fr 29cqw;
+      gap: 4cqw;
+      flex: 1;
+      align-items: center;
+      margin-top: -1cqw
+    }
+
+    .steps {
+      list-style: none;
+      padding: 0;
+      margin: 2.4cqw 0 0;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5cqw
+    }
+
+    .steps li {
+      display: flex;
+      gap: 1.4cqw;
+      align-items: flex-start;
+      font-size: 1.75cqw;
+      font-weight: 700;
+      line-height: 1.45
+    }
+
+    .steps li span {
+      flex-shrink: 0;
+      width: 3cqw;
+      height: 3cqw;
+      border-radius: 50%;
+      background: var(--blue);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4cqw;
+      font-weight: 900
+    }
+
+    .steps li small {
+      display: block;
+      font-size: 1.25cqw;
+      color: var(--sub);
+      font-weight: 500;
+      margin-top: .3cqw
+    }
+
+    .qrbox {
+      background: #fff;
+      border-radius: 2cqw;
+      border: .3cqw solid var(--blue);
+      padding: 1.6cqw 2.2cqw;
+      text-align: center;
+      box-shadow: 0 1.2cqw 0 var(--blue-l)
+    }
+
+    .qrbox .q {
+      width: 22cqw;
+      aspect-ratio: 1;
+      margin: 0 auto
+    }
+
+    .qrbox .q svg {
+      width: 100%;
+      height: 100%;
+      display: block
+    }
+
+    .qrbox .u {
+      font-size: 1.05cqw;
+      color: var(--sub);
+      margin-top: 1cqw;
+      word-break: break-all
+    }
+
+    .qrbox .cap {
+      font-size: 1.5cqw;
+      font-weight: 900;
+      margin-bottom: 1cqw
+    }
+
+    .qrbox .cap b {
+      color: var(--red)
+    }
+
+    /* 二つ名のしくみ */
+    .formula {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 2cqw;
+      margin-top: 3.6cqw
+    }
+
+    .chip {
+      min-width: 16cqw;
+      text-align: center;
+      padding: 2cqw 2.4cqw;
+      border-radius: 1.4cqw;
+      font-size: 3cqw;
+      font-weight: 900;
+      background: var(--blue-l);
+      color: var(--blue);
+      transition: opacity .25s
+    }
+
+    .chip.b {
+      background: #fdeaea;
+      color: var(--red)
+    }
+
+    .op {
+      font-size: 3cqw;
+      font-weight: 900;
+      color: var(--sub)
+    }
+
+    .result {
+      margin-top: 3cqw;
+      text-align: center
+    }
+
+    .result .lb {
+      font-size: 1.3cqw;
+      color: var(--sub);
+      letter-spacing: .2em
+    }
+
+    .result .tt {
+      font-size: 5.2cqw;
+      font-weight: 900;
+      margin-top: .6cqw;
+      transition: opacity .25s
+    }
+
+    .fade {
+      opacity: 0
+    }
+
+    .words {
+      position: absolute;
+      left: 6.5cqw;
+      right: 6.5cqw;
+      bottom: 4.8cqw;
+      display: flex;
+      gap: 2cqw;
+      font-size: 1.15cqw;
+      color: var(--sub)
+    }
+
+    .words div {
+      flex: 1;
+      line-height: 2
+    }
+
+    .words span {
+      display: inline-block;
+      white-space: nowrap;
+      margin-right: 1.1cqw
+    }
+
+    .words b {
+      color: var(--ink);
+      margin-right: .6cqw
+    }
+
+    /* 休憩 */
+    .break {
+      justify-content: center
+    }
+
+    .break .row {
+      display: grid;
+      grid-template-columns: 1fr 29cqw;
+      gap: 5cqw;
+      align-items: center
+    }
+
+    .break .qrbox {
+      padding: 1.4cqw
+    }
+
+    .break .qrbox .cap {
+      font-size: 1.25cqw
+    }
+
+    /* 締め */
+    .end {
+      justify-content: center;
+      align-items: center;
+      text-align: center
+    }
+
+    .end h2 {
+      font-size: 5.4cqw
+    }
+
+    .end .lead {
+      font-size: 1.8cqw
+    }
+
+    .end .next {
+      margin-top: 3cqw;
+      display: inline-flex;
+      gap: 1.2cqw;
+      align-items: center;
+      font-size: 1.6cqw;
+      font-weight: 700;
+      border: .2cqw solid var(--blue);
+      border-radius: 99px;
+      padding: 1cqw 2.4cqw
+    }
+
+    .end .next b {
+      color: var(--red)
+    }
+
+    /* 操作 */
+    .nav {
+      position: fixed;
+      right: 14px;
+      top: 12px;
+      display: flex;
+      gap: 6px;
+      opacity: 0;
+      transition: opacity .2s;
+      z-index: 9
+    }
+
+    body:hover .nav,
+    .nav:focus-within {
+      opacity: 1
+    }
+
+    .nav button {
+      border: 1px solid var(--line);
+      background: #fff;
+      border-radius: 8px;
+      padding: 6px 12px;
+      font: inherit;
+      font-size: 13px;
+      cursor: pointer;
+      color: var(--ink)
+    }
+
+    .cfg {
+      position: fixed;
+      inset: 0;
+      background: rgba(20, 20, 20, .45);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 10
+    }
+
+    .cfg.on {
+      display: flex
+    }
+
+    .cfg form {
+      background: #fff;
+      border-radius: 14px;
+      padding: 22px;
+      width: min(520px, calc(100vw - 32px));
+      font-size: 14px
+    }
+
+    .cfg input {
+      width: 100%;
+      font: inherit;
+      padding: 10px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      margin: 10px 0
+    }
+
+    .cfg button {
+      font: inherit;
+      padding: 9px 16px;
+      border-radius: 8px;
+      border: 0;
+      background: var(--blue);
+      color: #fff;
+      font-weight: 700;
+      cursor: pointer
+    }
+
+    @media (prefers-reduced-motion:reduce) {
+      .slide.on {
+        animation: none
+      }
+
+      .chip,
+      .result .tt {
+        transition: none
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="viewport">
+    <div class="stage" id="stage">
+
+      <!-- 1 表紙 -->
+      <section class="slide cover">
+        <div class="date en">2026.10.24 SAT — 18:00 START</div>
+        <h1><span class="s">東京DEV31期／福岡DEV19期</span>合同卒業制作<br>お披露目会</h1>
+        <div class="band"></div>
+      </section>
+
+      <!-- 2 今日の流れ -->
+      <section class="slide">
+        <div class="kicker en">TIMELINE</div>
+        <h2>今日の流れ</h2>
+        <div class="tl2">
+          <div class="r"><span class="tm en">18:00</span><span class="ev">スタート・ルール説明</span></div>
+          <div class="r pres"><span class="tm en">18:10</span><span class="ev">第1部<b>7名</b></span><span
+              class="dt">発表5分＋投票1分</span></div>
+          <div class="r brk"><span class="tm en">18:52</span><span class="ev">休憩</span></div>
+          <div class="r pres"><span class="tm en">19:02</span><span class="ev">第2部<b>6名</b></span><span
+              class="dt">発表5分＋投票1分</span></div>
+          <div class="r brk"><span class="tm en">19:38</span><span class="ev">休憩</span></div>
+          <div class="r pres"><span class="tm en">19:48</span><span class="ev">第3部<b>6名</b></span><span
+              class="dt">発表5分＋投票1分</span></div>
+          <div class="r"><span class="tm en">20:24</span><span class="ev">卒業式のお知らせ</span></div>
+          <div class="r"><span class="tm en">20:30</span><span class="ev">終了</span></div>
+        </div>
+        <div class="foot en">TOKYO DEV31 / FUKUOKA DEV19 GRADUATION SHOWCASE</div>
+        <div class="pg en"></div>
+        <div class="band"></div>
+      </section>
+
+      <!-- 3 楽しみ方 -->
+      <section class="slide">
+        <div class="kicker en">HOW TO ENJOY</div>
+        <h2>今日の楽しみ方</h2>
+        <div class="ways">
+          <div class="way">
+            <div class="no en">01</div>
+            <h3>発表する／発表を聞く</h3>
+            <p>気軽な場なので、課題発表のときのようにぜひ話してください。</p>
+            <ul class="talk">
+              <li>プロダクトのこだわりポイント</li>
+              <li>卒制開発のうえで大変だったこと</li>
+              <li>今後こうしていきたい！</li>
+            </ul>
+          </div>
+          <div class="way main">
+            <div class="no en">02</div>
+            <h3>発表者に<br><span class="hl">「はなむけの二つ名」</span>を贈る</h3>
+            <p>発表を聴いたら、スマホで言葉を2つ選んで贈ります。いちばん多く贈られた組み合わせが、その人の二つ名に。</p>
+          </div>
+        </div>
+        <div class="foot en">TOKYO DEV31 / FUKUOKA DEV19 GRADUATION SHOWCASE</div>
+        <div class="pg en"></div>
+        <div class="band"></div>
+      </section>
+
+      <!-- 4 贈り方＋QR -->
+      <section class="slide">
+        <div class="kicker en">HOW TO GIVE</div>
+        <h2>二つ名の贈り方</h2>
+        <div class="split">
+          <div>
+            <ol class="steps">
+              <li><span class="en">1</span>
+                <div>右のQRコードをスマホで読み込む<small>PCのブラウザでもOK。ログインは不要です</small></div>
+              </li>
+              <li><span class="en">2</span>
+                <div>発表を聴きながら、前半と後半の言葉を1つずつ選ぶ<small>「どうつくった人に見えた？」×「どういう存在に見えた？」</small></div>
+              </li>
+              <li><span class="en">3</span>
+                <div>「この2つを贈る」を押す<small>締め切りまでは何度でも選び直せます</small></div>
+              </li>
+              <li><span class="en">4</span>
+                <div>締め切り後、画面に二つ名が発表されます<small>画面は自動で次の発表者に切り替わります</small></div>
+              </li>
+            </ol>
+          </div>
+          <div class="qrbox">
+            <div class="cap">ここから <b>二つ名</b> を贈ろう</div>
+            <div class="q" data-qr></div>
+            <div class="u en" data-url></div>
+          </div>
+        </div>
+        <div class="pg en"></div>
+        <div class="band"></div>
+      </section>
+
+      <!-- 5 二つ名のしくみ -->
+      <section class="slide">
+        <div class="kicker en">NICKNAME GENERATOR</div>
+        <h2>二つ名のしくみ</h2>
+        <div class="formula">
+          <div class="chip" id="exA">爆速の</div>
+          <div class="op">×</div>
+          <div class="chip b" id="exB">魔法使い</div>
+        </div>
+        <div class="result">
+          <div class="lb">たとえば</div>
+          <div class="tt" id="exT">爆速の魔法使い</div>
+        </div>
+        <div class="words" id="words"></div>
+        <div class="pg en"></div>
+        <div class="band"></div>
+      </section>
+
+      <!-- 6 休憩 -->
+      <section class="slide break">
+        <div class="row">
+          <div>
+            <div class="kicker en">BREAK TIME</div>
+            <h2 style="font-size:6cqw">休憩中</h2>
+            <div class="lead" style="font-size:1.9cqw;margin-top:2cqw">まだ二つ名の画面を開いていない人は、<br>右のQRコードからどうぞ。</div>
+          </div>
+          <div class="qrbox">
+            <div class="cap">まだ開いていない人はこちら</div>
+            <div class="q" data-qr></div>
+            <div class="u en" data-url></div>
+          </div>
+        </div>
+        <div class="band"></div>
+      </section>
+
+      <!-- 7 締め -->
+      <section class="slide end">
+        <div class="kicker en" style="justify-content:center">THANK YOU</div>
+        <h2>卒業、<span class="hl">おめでとう</span>ございます！</h2>
+        <div class="lead">つくりきった全員に、もう一度大きな拍手を。</div>
+        <div class="next">明日 <b>10/25(日) 18:00〜</b> 合同卒業式（原宿・福岡・オンライン）</div>
+        <div class="band"></div>
+      </section>
+
+    </div>
+  </div>
+
+  <div class="nav"><button id="prev">←</button><button id="next">→</button><button id="fs">全画面</button><button
+      id="set">QRのURL</button></div>
+  <div class="cfg" id="cfg">
+    <form id="cfgForm">
+      <b>QRコードにするURL</b>
+      <div style="color:#6b7480;margin-top:6px">投票画面のURL（例：https://gs-shougou-app.〇〇.workers.dev/）</div>
+      <input id="cfgUrl" type="url" required placeholder="https://">
+      <button>保存</button>
+    </form>
+  </div>
+
+  <script>
+    // ---- QRコード生成（バイトモード・誤り訂正M） ----
+    function makeQR(text) {const ECC = [-1, 10, 16, 26, 18, 24, 16, 18, 22, 22, 26, 30, 22, 22, 24, 24, 28, 28, 26, 26, 26, 26, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28], BLK = [-1, 1, 1, 1, 2, 2, 4, 4, 4, 5, 5, 5, 8, 9, 9, 10, 10, 11, 13, 14, 16, 17, 17, 18, 20, 21, 23, 25, 26, 28, 29, 31, 33, 35, 37, 38, 40, 43, 45, 47, 49]; const bytes = Array.from(new TextEncoder().encode(text)); const rawMods = v => {let r = (16 * v + 128) * v + 64; if (v >= 2) {const n = Math.floor(v / 7) + 2; r -= (25 * n - 10) * n - 55; if (v >= 7) r -= 36} return r}; const dataCw = v => Math.floor(rawMods(v) / 8) - ECC[v] * BLK[v]; let ver = 1; for (; ver <= 40; ver++)if (4 + (ver < 10 ? 8 : 16) + bytes.length * 8 <= dataCw(ver) * 8) break; if (ver > 40) throw new Error("too long"); const bits = []; const push = (val, len) => {for (let i = len - 1; i >= 0; i--)bits.push((val >>> i) & 1)}; push(4, 4); push(bytes.length, ver < 10 ? 8 : 16); bytes.forEach(b => push(b, 8)); const cap = dataCw(ver) * 8; push(0, Math.min(4, cap - bits.length)); push(0, (8 - bits.length % 8) % 8); for (let p = 0xEC; bits.length < cap; p ^= 0xEC ^ 0x11)push(p, 8); const data = []; for (let i = 0; i < bits.length; i += 8)data.push(parseInt(bits.slice(i, i + 8).join(""), 2)); const mul = (x, y) => {let z = 0; for (let i = 7; i >= 0; i--) {z = (z << 1) ^ ((z >>> 7) * 0x11D); z ^= ((y >>> i) & 1) * x} return z}; const divisor = deg => {const r = new Array(deg).fill(0); r[deg - 1] = 1; let root = 1; for (let i = 0; i < deg; i++) {for (let j = 0; j < r.length; j++) {r[j] = mul(r[j], root); if (j + 1 < r.length) r[j] ^= r[j + 1]} root = mul(root, 2)} return r}; const remainder = (d, div) => {const r = new Array(div.length).fill(0); for (const b of d) {const f = b ^ r.shift(); r.push(0); div.forEach((c, i) => (r[i] ^= mul(c, f)))} return r}; const nb = BLK[ver], el = ECC[ver], raw = Math.floor(rawMods(ver) / 8); const nShort = nb - (raw % nb), shortLen = Math.floor(raw / nb), div = divisor(el); const blocks = []; for (let i = 0, k = 0; i < nb; i++) {const dat = data.slice(k, k + shortLen - el + (i < nShort ? 0 : 1)); k += dat.length; const ecc = remainder(dat, div); if (i < nShort) dat.push(0); blocks.push(dat.concat(ecc))} const cw = []; for (let i = 0; i < blocks[0].length; i++)blocks.forEach((b, j) => {if (i !== shortLen - el || j >= nShort) cw.push(b[i])}); const size = ver * 4 + 17; const M = Array.from({length: size}, () => new Array(size).fill(false)); const F = Array.from({length: size}, () => new Array(size).fill(false)); const set = (x, y, d) => {M[y][x] = d; F[y][x] = true}; for (let i = 0; i < size; i++) {set(6, i, i % 2 === 0); set(i, 6, i % 2 === 0)} const finder = (cx, cy) => {for (let dy = -4; dy <= 4; dy++)for (let dx = -4; dx <= 4; dx++) {const x = cx + dx, y = cy + dy, d = Math.max(Math.abs(dx), Math.abs(dy)); if (x >= 0 && x < size && y >= 0 && y < size) set(x, y, d !== 2 && d !== 4)} }; finder(3, 3); finder(size - 4, 3); finder(3, size - 4); if (ver > 1) {const n = Math.floor(ver / 7) + 2, step = ver === 32 ? 26 : Math.ceil((ver * 4 + 4) / (n * 2 - 2)) * 2; const pos = [6]; for (let p = size - 7; pos.length < n; p -= step)pos.splice(1, 0, p); pos.forEach((a, i) => pos.forEach((b, j) => {if ((i === 0 && j === 0) || (i === 0 && j === n - 1) || (i === n - 1 && j === 0)) return; for (let dy = -2; dy <= 2; dy++)for (let dx = -2; dx <= 2; dx++)set(a + dx, b + dy, Math.max(Math.abs(dx), Math.abs(dy)) !== 1)}))} const drawFormat = mask => {const d = (0 << 3) | mask; let r = d; for (let i = 0; i < 10; i++)r = (r << 1) ^ ((r >>> 9) * 0x537); const b = ((d << 10) | r) ^ 0x5412, g = i => ((b >>> i) & 1) === 1; for (let i = 0; i <= 5; i++)set(8, i, g(i)); set(8, 7, g(6)); set(8, 8, g(7)); set(7, 8, g(8)); for (let i = 9; i < 15; i++)set(14 - i, 8, g(i)); for (let i = 0; i < 8; i++)set(size - 1 - i, 8, g(i)); for (let i = 8; i < 15; i++)set(8, size - 15 + i, g(i)); set(8, size - 8, true)}; drawFormat(0); if (ver >= 7) {let r = ver; for (let i = 0; i < 12; i++)r = (r << 1) ^ ((r >>> 11) * 0x1F25); const b = (ver << 12) | r; for (let i = 0; i < 18; i++) {const bit = ((b >>> i) & 1) === 1, a = size - 11 + (i % 3), c = Math.floor(i / 3); set(a, c, bit); set(c, a, bit)} } let bi = 0; for (let right = size - 1; right >= 1; right -= 2) {if (right === 6) right = 5; for (let v = 0; v < size; v++)for (let j = 0; j < 2; j++) {const x = right - j, up = ((right + 1) & 2) === 0, y = up ? size - 1 - v : v; if (!F[y][x] && bi < cw.length * 8) {M[y][x] = ((cw[bi >>> 3] >>> (7 - (bi & 7))) & 1) === 1; bi++} } } const maskFn = [(x, y) => (x + y) % 2 === 0, (x, y) => y % 2 === 0, x => x % 3 === 0, (x, y) => (x + y) % 3 === 0, (x, y) => (Math.floor(x / 3) + Math.floor(y / 2)) % 2 === 0, (x, y) => ((x * y) % 2) + ((x * y) % 3) === 0, (x, y) => (((x * y) % 2) + ((x * y) % 3)) % 2 === 0, (x, y) => (((x + y) % 2) + ((x * y) % 3)) % 2 === 0]; const applyMask = m => {for (let y = 0; y < size; y++)for (let x = 0; x < size; x++)if (!F[y][x] && maskFn[m](x, y)) M[y][x] = !M[y][x]}; const penalty = () => {let p = 0, dark = 0; const line = get => {for (let a = 0; a < size; a++) {let run = 1; let s = ""; for (let b = 0; b < size; b++) {const v = get(a, b); s += v ? "1" : "0"; if (b > 0) {if (v === get(a, b - 1)) {run++; if (run === 5) p += 3; else if (run > 5) p++} else run = 1} } for (const pat of ["10111010000", "00001011101"]) {let i = s.indexOf(pat); while (i >= 0) {p += 40; i = s.indexOf(pat, i + 1)} } } }; line((a, b) => M[a][b]); line((a, b) => M[b][a]); for (let y = 0; y < size - 1; y++)for (let x = 0; x < size - 1; x++) {const c = M[y][x]; if (c === M[y][x + 1] && c === M[y + 1][x] && c === M[y + 1][x + 1]) p += 3} M.forEach(r => r.forEach(c => (dark += c ? 1 : 0))); const total = size * size; p += Math.floor(Math.abs(dark * 20 - total * 10) / total) * 10; return p}; let best = 0, bestP = Infinity; for (let m = 0; m < 8; m++) {applyMask(m); drawFormat(m); const pp = penalty(); if (pp < bestP) {bestP = pp; best = m} applyMask(m)} applyMask(best); drawFormat(best); return M}
+    function qrSVG(text) {const M = makeQR(text), n = M.length, q = 2; let d = ""; M.forEach((row, y) => row.forEach((c, x) => {if (c) d += `M${x + q} ${y + q}h1v1h-1z`})); return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${n + q * 2} ${n + q * 2}" shape-rendering="crispEdges"><rect width="100%" height="100%" fill="#fff"/><path d="${d}" fill="#141414"/></svg>`}
+
+    (() => {
+      const store = {get(k) {try {return localStorage.getItem(k);} catch {return null;} }, set(k, v) {try {localStorage.setItem(k, v);} catch { } } };
+      const params = new URLSearchParams(location.search);
+      const hosted = /^https?:$/.test(location.protocol);
+      let appUrl = params.get("url") || store.get("guide-url") || (hosted ? location.origin + "/" : "");
+
+      const drawQR = () => {
+        document.querySelectorAll("[data-qr]").forEach((el) => {el.innerHTML = appUrl ? qrSVG(appUrl) : `<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#6b7480;font-size:1.3cqw">右下の「QRのURL」から<br>URLを設定してください</div>`;});
+        document.querySelectorAll("[data-url]").forEach((el) => {el.textContent = appUrl.replace(/^https?:\/\//, "").replace(/\/$/, "");});
+      };
+      drawQR();
+
+      // ---- スライド送り ----
+      const slides = [...document.querySelectorAll(".slide")];
+      let cur = Math.min(slides.length - 1, Math.max(0, Number(location.hash.slice(1)) - 1 || 0));
+      const show = (i) => {
+        cur = Math.max(0, Math.min(slides.length - 1, i));
+        slides.forEach((s, k) => s.classList.toggle("on", k === cur));
+        slides[cur].querySelectorAll(".pg").forEach((p) => (p.textContent = `${cur + 1} / ${slides.length}`));
+        history.replaceState(null, "", "#" + (cur + 1));
+      };
+      show(cur);
+      document.getElementById("prev").onclick = () => show(cur - 1);
+      document.getElementById("next").onclick = () => show(cur + 1);
+      document.getElementById("fs").onclick = () => (document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen()).catch(() => { });
+      const cfg = document.getElementById("cfg");
+      document.getElementById("set").onclick = () => {document.getElementById("cfgUrl").value = appUrl; cfg.classList.add("on");};
+      cfg.onclick = (e) => {if (e.target === cfg) cfg.classList.remove("on");};
+      document.getElementById("cfgForm").onsubmit = (e) => {e.preventDefault(); appUrl = document.getElementById("cfgUrl").value.trim(); store.set("guide-url", appUrl); cfg.classList.remove("on"); drawQR();};
+      document.getElementById("stage").addEventListener("click", () => show(cur + 1));
+      document.addEventListener("keydown", (e) => {
+        if (cfg.classList.contains("on")) return;
+        if (["ArrowRight", "PageDown", " ", "Enter"].includes(e.key)) {e.preventDefault(); show(cur + 1);}
+        else if (["ArrowLeft", "PageUp", "Backspace"].includes(e.key)) {e.preventDefault(); show(cur - 1);}
+        else if (e.key === "f" || e.key === "F") document.getElementById("fs").click();
+        else if (/^[1-9]$/.test(e.key)) show(Number(e.key) - 1);
+      });
+
+      // ---- 二つ名のしくみ：実際の語彙からランダムに組み合わせて見せる ----
+      let HOW = ["作り直しの", "手を止めない", "沼に潜った", "逆算する", "一点突破の", "静かに燃える", "ひらめきが降る", "爆速の", "こだわり強めの", "バグと踊る"];
+      let BEING = ["求道者", "発明家", "職人", "開拓者", "実験者", "遊撃手", "巻き込み屋", "魔法使い", "錬金術師", "革命児", "仕掛け人"];
+      const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"}[c]));
+      const drawWords = () => {
+        document.getElementById("words").innerHTML =
+          `<div><b>前半</b>${HOW.map((w) => `<span>${esc(w)}</span>`).join("")}</div><div><b>後半</b>${BEING.map((w) => `<span>${esc(w)}</span>`).join("")}</div>`;
+      };
+      drawWords();
+      if (hosted) {
+        const base = appUrl ? new URL(appUrl, location.href).origin : location.origin;
+        if (base === location.origin) fetch("/api/state").then((r) => r.json()).then((j) => {
+          if (j?.state?.how?.length && j?.state?.being?.length) {HOW = j.state.how; BEING = j.state.being; drawWords();}
+        }).catch(() => { });
+      }
+      const exA = document.getElementById("exA"), exB = document.getElementById("exB"), exT = document.getElementById("exT");
+      const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+      setInterval(() => {
+        if (!slides[cur].contains(exA)) return;
+        const a = HOW[Math.floor(Math.random() * HOW.length)], b = BEING[Math.floor(Math.random() * BEING.length)];
+        if (reduce) {exA.textContent = a; exB.textContent = b; exT.textContent = a + b; return;}
+        [exA, exB, exT].forEach((el) => el.classList.add("fade"));
+        setTimeout(() => {exA.textContent = a; exB.textContent = b; exT.textContent = a + b;[exA, exB, exT].forEach((el) => el.classList.remove("fade"));}, 260);
+      }, 2400);
+
+    })();
+  </script>
+</body>
+
+</html>
