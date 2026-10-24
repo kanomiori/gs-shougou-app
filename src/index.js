@@ -209,6 +209,18 @@ export class Room extends DurableObject {
         s.phase = "voting";
         break;
       }
+      case "move": {
+        // 手動並べ替え。いま発表中の人はそのまま（index だけ追従させる）
+        const from = s.speakers.findIndex((x) => x.id === p.id);
+        const to = Number(p.to);
+        if (from < 0 || !Number.isInteger(to) || to < 0 || to > last) return { ok: false, error: "並べ替えできませんでした" };
+        if (from === to) return { ok: true };
+        const curId = this.current(s)?.id;
+        const [moved] = s.speakers.splice(from, 1);
+        s.speakers.splice(to, 0, moved);
+        s.index = Math.max(0, s.speakers.findIndex((x) => x.id === curId));
+        break;
+      }
       case "setVocab": {
         const how = (p.how ?? []).map((w) => clean(w, 20)).filter(Boolean);
         const being = (p.being ?? []).map((w) => clean(w, 20)).filter(Boolean);
